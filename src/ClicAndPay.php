@@ -3,7 +3,7 @@
 
 namespace YllyClicAndPay;
 
-use DateTime;
+use Exception;
 use SoapClient;
 use SoapFault;
 use SoapHeader;
@@ -16,31 +16,22 @@ class ClicAndPay
     const MODE_TEST = 'TEST';
 
     private $shopId;
-    private $requestId;
     private $timestamp;
     private $mode;
     private $authToken;
+    private $generationUuid;
 
     /**
      * @param int $shopId
-     * @param $requestId
      * @param $timestamp
      * @param $mode
-     * @param $authToken
      */
-    public function __construct($shopId, $requestId, $timestamp, $mode, $authToken)
+    public function __construct($shopId, $timestamp, $mode)
     {
         $this->shopId = $shopId;
-        $this->requestId = $requestId;
         $this->timestamp = $timestamp;
         $this->mode = $mode;
-        $this->authToken = $authToken;
-    }
-
-
-    public function generationUuid()
-    {
-        return sprintf(
+        $this->generationUuid = sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             mt_rand(0, 0xffff),
             mt_rand(0, 0xffff),
@@ -51,12 +42,9 @@ class ClicAndPay
             mt_rand(0, 0xffff),
             mt_rand(0, 0xffff)
         );
+        $this->authToken = base64_encode(hash_hmac('sha256', sprintf('%s%s', $this->generationUuid, $this->timestamp), true));
     }
 
-    public function authToken($generationUuid, $timestamp)
-    {
-        return base64_encode(hash_hmac('sha256', sprintf('%s%s', $generationUuid, $timestamp), true));
-    }
 
     /**
      * @param string $wsdl
@@ -64,35 +52,46 @@ class ClicAndPay
      *
      * @return mixed
      * @throws SoapFault
+     * @throws Exception
      */
     public function send($wsdl, $options = array('trace' => 1, 'exceptions' => 0, 'encoding' => 'UTF-8', 'soapaction' => ''))
     {
         $client = new SoapClient($wsdl, $options);
-        $authToken = $this->authToken($this->generationUuid(), new DateTime('Y-m-d\TH:i:s\Z'));
-        $client->__setSoapHeaders($this->createHeaders($this->shopId, $this->mode, $authToken));
+        $client->__setSoapHeaders($this->createHeaders($this->mode));
 
         return $client;
     }
 
     /**
-     * @param $shopId
-     * @param $mode
-     * @param $authToken
+     * @param int $shopId
+     * @param string $mode
+     * @param string $authToken
      * @return mixed
-     * @throws SoapFault
+     * @throws Exception
      */
-    public function createHeaders($shopId, $mode, $authToken)
+    public function createHeaders($mode)
     {
-        $ns = ClicAndPay::NS_HEADER;
-        $requestId = $this->generationUuid();
-        $timestamp = new DateTime('Y-m-d\TH:i:s\Z');
+        $ns = self::NS_HEADER;
+//        $timestamp = new DateTime('Y-m-d\TH:i:s\Z');
 
-        $headerShopId = new SOAPHeader($ns, 'shopId', $shopId);
-        $headerRequestId = new SOAPHeader($ns, 'requestId', $requestId);
-        $headerTimestamp = new SOAPHeader($ns, 'timestamp', $timestamp);
+        $headerShopId = new SOAPHeader($ns, 'shopId', $this->shopId);
+        $headerRequestId = new SOAPHeader($ns, 'requestId', $this->generationUuid);
+        $headerTimestamp = new SOAPHeader($ns, 'timestamp', $this->timestamp);
         $headerMode = new SOAPHeader($ns, 'mode', $mode);
-        $headerAuthToken = new SOAPHeader($ns, 'authToken', $authToken);
+        $headerAuthToken = new SOAPHeader($ns, 'authToken', $this->authToken);
 
-        return new SoapClient($wsdl, $options);
+        return array(
+            $headerShopId,
+            $headerRequestId,
+            $headerTimestamp,
+            $headerMode,
+            $headerAuthToken
+        );
+    }
+
+    public function checkAuthToken(){
+        $responseToken = base64_encode(hash_hmac('sha256', sprintf('%s%s', $this->timestamp, $this->generationUuid), true));
+
+        return $this->authToken === $responseToken;
     }
 }
