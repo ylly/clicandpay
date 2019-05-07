@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <title>3DS</title>
+    <script type="text/javascript">
+        function submitForm(){
+            document.redirectForm.submit();
+        }
+    </script>
+</head>
+<body id="lyra" onLoad="setTimeout(submitForm(),500);">
+<div id="container">
+    <div id="paymentSolutionInfo">
+        <div id="title">&nbsp;</div>
+    </div>
+    <hr class="ensureDivHeight"/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <form name="redirectForm" action="{{ threeDsAcsUrl }}" method="POST">
+        <input type="hidden" name="PaReq" value="{{ threeDsEncodedPareq }}"/>
+        <input type="hidden" name="TermUrl" value="{{ threeDsServerResponseUrl }}"/>
+        <input type="hidden" name="MD" value="{{ threeDSrequestId }}"/>
+
+        <noscript><input type="submit" name="Go" value="Click to continue"/></noscript>
+    </form>
+    <div id="backToBoutiqueBlock"> </div>
+    <div id="footer"> </div>
+</div>
+</body>
+</html>
