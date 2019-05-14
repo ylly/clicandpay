@@ -4,7 +4,7 @@ namespace YllyClicAndPay\Model\Result;
 
 use YllyClicAndPay\Model\Response\Common;
 
-class CapturePayment extends Result
+class CapturePayment
 {
     /**
      * @var Common

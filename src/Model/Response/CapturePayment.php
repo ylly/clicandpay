@@ -4,8 +4,9 @@
 namespace YllyClicAndPay\Model\Response;
 
 use YllyClicAndPay\Model\Result\CapturePayment as CapturePaymentResult;
+use YllyClicAndPay\Model\Result\Result;
 
-class CapturePayment
+class CapturePayment extends Result
 {
     /**
      * @var CapturePaymentResult
