@@ -3,102 +3,127 @@
 
 namespace YllyClicAndPay;
 
+use DateTime;
 use SoapFault;
+use YllyClicAndPay\Model\CreatePayment;
+use YllyClicAndPay\Model\FindPayments;
+use YllyClicAndPay\Model\Request\Query;
+use YllyClicAndPay\Model\Response\CreatePayment as CreatePaymentResponse;
+use YllyClicAndPay\Model\Request\BillingDetails;
+use YllyClicAndPay\Model\Request\Card;
+use YllyClicAndPay\Model\Request\Customer;
+use YllyClicAndPay\Model\Request\ExtraDetails;
+use YllyClicAndPay\Model\Request\Order;
+use YllyClicAndPay\Model\Request\Payment as PaymentRequest;
+use YllyClicAndPay\Model\Request\Common;
+use YllyClicAndPay\Model\Request\Tech;
+use YllyClicAndPay\Model\Request\ThreeDS;
 
 class Payment extends ClicAndPay
 {
     /**
+     * @param string $mode
+     * @param string $paymentSource
+     * @param DateTime $submissionDate
+     * @param float $amount
+     * @param int $currency
+     * @param int $manualValidation
+     *
+     * @param string $orderId
+     * @param string $number
+     * @param string $scheme
+     * @param int $expiryMonth
+     * @param int $expiryYear
+     * @param string $cardSecurityCode
+     * @param DateTime $cardHolderBirthday
      * @throws SoapFault
      */
-    public function createPayment($mode = 'TEST')
+    public function createPayment($mode = 'TEST', $paymentSource, $submissionDate, $amount, $currency, $manualValidation = 0, $orderId, $number, $scheme, $expiryMonth, $expiryYear, $cardSecurityCode, $cardHolderBirthday)
     {
         $client = $this->getClient();
 
-        $commonRequest = new commonRequest;
-        $commonRequest->paymentSource = 'EC';
-        $commonRequest->submissionDate = new DateTime('now', new DateTimeZone('UTC'));
+        $commonRequest = new Common();
+        $commonRequest->setPaymentSource($paymentSource);
+        $commonRequest->setSubmissionDate($submissionDate);
 
-        $threeDSRequest = new threeDSRequest;
-        $threeDSRequest->mode = 'ENABLED_CREATE';
+        $threeDSRequest = new ThreeDS();
+        $threeDSRequest->setMode($mode);
 
-        $paymentRequest = new paymentRequest;
-        $paymentRequest->amount = '2990';
-        $paymentRequest->currency = '978';
-        $paymentRequest->manualValidation = '0';
+        $paymentRequest = new PaymentRequest();
+        $paymentRequest->setAmount($amount);
+        $paymentRequest->setCurrency($currency);
+        $paymentRequest->setManualValidation($manualValidation);
 
-        $orderRequest = new orderRequest;
-        $orderRequest->orderId = 'myOrder';
-        $cardRequest = new cardRequest;
-        $cardRequest->number = '4970100000000000';
-        $cardRequest->scheme = 'VISA';
-        $cardRequest->expiryMonth = '12';
-        $cardRequest->expiryYear = '2023';
-        $cardRequest->cardSecurityCode = '123';
-        $cardRequest->cardHolderBirthDay = '2008-12-31';
+        $orderRequest = new Order();
+        $orderRequest->setOrderId($orderId);
 
-        $customerRequest = new customerRequest;
-        $customerRequest->billingDetails = new billingDetailsRequest;
-        $customerRequest->billingDetails->email = "test@exemple.com";
+        $cardRequest = new Card();
+        $cardRequest->setNumber($number);
+        $cardRequest->setScheme($scheme);
+        $cardRequest->setExpiryMonth($expiryMonth);
+        $cardRequest->setExpiryYear($expiryYear);
+        $cardRequest->setCardSecurityCode($cardSecurityCode);
+        $cardRequest->setCardHolderBirthDay($cardHolderBirthday);
 
-        $customerRequest->extraDetails = new extraDetailsRequest;
+        $customerRequest = new Customer();
+        $customerRequest->setBillingDetails(new BillingDetails());
+        $customerRequest->getBillingDetails()->setEmail('test@exemple.com');
+        $customerRequest->setExtraDetails(new ExtraDetails());
 
-        $techRequest = new techRequest;
+        $techRequest = new Tech();
 
         try {
-            $createPaymentRequest = new createPayment;
-            $createPaymentRequest->commonRequest = $commonRequest;
-            $createPaymentRequest->threeDSRequest = $threeDSRequest;
-            $createPaymentRequest->paymentRequest = $paymentRequest;
-            $createPaymentRequest->orderRequest = $orderRequest;
-            $createPaymentRequest->cardRequest = $cardRequest;
-            $createPaymentRequest->customerRequest = $customerRequest;
-            $createPaymentRequest->techRequest = $techRequest;
-            $createPaymentRequest->commonRequest->submissionDate = $createPaymentRequest->commonRequest->submissionDate->format(dateTime::W3C);
-            $createPaymentResponse = new createPaymentResponse();
-            $createPaymentResponse = $client->createPayment($createPaymentRequest);
+            $createPaymentRequest = new CreatePayment();
+            $createPaymentRequest->setCardRequest($cardRequest);
+            $createPaymentRequest->setCommonRequest($commonRequest);
+            $createPaymentRequest->setCustomerRequest($customerRequest);
+            $createPaymentRequest->setOrderRequest($orderRequest);
+            $createPaymentRequest->setPaymentRequest($paymentRequest);
+            $createPaymentRequest->setTechRequest($techRequest);
+            $createPaymentRequest->setThreeDSRequest($threeDSRequest);
+            $createPaymentRequest->getCommonRequest()->setSubmissionDate($createPaymentRequest->getCommonRequest()->getSubmissionDate()->format(DateTime::W3C));
+
+            $createPaymentResponse = new CreatePaymentResponse();
+            $createPaymentResponse->setCreatePaymentResult($client->createPayment($createPaymentRequest));
         } catch (SoapFault $fault) {
-            trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR}
+            trigger_error(sprintf('SOAP Fault: (faultcode: %s, faultstring: %s)', $fault->faultcode, $fault->faultstring), E_USER_ERROR);
+        }
 
 
         if ($this->send()) {
             echo 'Erreur interne rencontrée';
-        } else {
-            if ($createPaymentResponse->createPaymentResult->commonResponse->responseCode != '0') {
-            } else {
-                if (isset ($createPaymentResponse->createPaymentResult->commonResponse->transactionStatusLabel)) {
-                    switch ($createPaymentResponse->createPaymentResult->commonResponse->transactionStatusLabel) {
-                        case 'AUTHORISED':
-                            echo 'paiement accepté';
-                            break;
-                        case 'WAITING_AUTHORISATION':
-                            echo 'paiement accepté';
-                            break;
-                        case 'AUTHORISED_TO_VALIDATE':
-                            echo 'paiement accepté';
-                            break;
-                        case 'WAITING_AUTHORISATION_TO_VALIDATE':
-                            echo 'paiement accepté';
-                            break;
-                        default:
-                            echo 'paiement refusé';
-                            break;
-                    }
-                } else {
-                    $cookie = $this->getJsessionId($client);
-
-                    $MD = sprintf('%s+%s', $this->setJsessionId($client), $createPaymentResponse->createPaymentResult->threeDSResponse->authenticationRequestData->threeDSRequestId);
-
-                    $threeDsAcsUrl = $createPaymentResponse->createPaymentResult->threeDSResponse->authenticationRequestData->threeDSAcsUrl;
-                    $threeDsEncodedPareq = $createPaymentResponse->createPaymentResult->threeDSResponse->authenticationRequestData->threeDSEncodedPareq;
-                    $threeDsServerResponseUrl = 'http://127.0.0.1/webservices/ws-v5/retour3DS.php';
-
-                    $JSESSIONID = $this->setJsessionId($client);
-                    if ($mode === 'TEST') {
-                        $threeDsAcsUrl = sprintf('%s;jsessionid=%s', $threeDsAcsUrl, $JSESSIONID);
-                    }
-
-                }
+        } else if ($createPaymentResponse->getCreatePaymentResult()->getCommonResponse()->getResponseCode() === '0') {
+            switch ($createPaymentResponse->getCreatePaymentResult()->getCommonResponse()->getTransactionStatusLabel()) {
+                case 'AUTHORISED':
+                    echo 'paiement accepté';
+                    break;
+                case 'WAITING_AUTHORISATION':
+                    echo 'paiement accepté';
+                    break;
+                case 'AUTHORISED_TO_VALIDATE':
+                    echo 'paiement accepté';
+                    break;
+                case 'WAITING_AUTHORISATION_TO_VALIDATE':
+                    echo 'paiement accepté';
+                    break;
+                default:
+                    echo 'paiement refusé';
+                    break;
             }
+        } else {
+            $cookie = $this->getJsessionId($client);
+
+            $MD = sprintf('%s+%s', $this->setJsessionId($client), $createPaymentResponse->getCreatePaymentResult()->getThreeDSResponse()->getAuthenticationRequestData()->getThreeDSRequestId());
+
+            $threeDsAcsUrl = $createPaymentResponse->getCreatePaymentResult()->getThreeDSResponse()->getAuthenticationRequestData()->getThreeDSAcsUrl();
+            $threeDsEncodedPareq = $createPaymentResponse->getCreatePaymentResult()->getThreeDSResponse()->getAuthenticationRequestData()->getThreeDSEncodedPareq();
+            $threeDsServerResponseUrl = 'http://127.0.0.1/webservices/ws-v5/retour3DS.php';
+
+            $JSESSIONID = $this->setJsessionId($client);
+            if ($mode === 'TEST') {
+                $threeDsAcsUrl = sprintf('%s;jsessionid=%s', $threeDsAcsUrl, $JSESSIONID);
+            }
+
         }
     }
 
@@ -109,48 +134,44 @@ class Payment extends ClicAndPay
     {
         $client = $this->getClient();
 
-        //Génération du body
-        $queryRequest = new queryRequest;
-        $queryRequest->orderId = 'myOrder';
+        $queryRequest = new Query();
+        $queryRequest->setOrderId('myOrder');
 
         try {
-            $findPaymentsRequest = new findPayments;
-            $findPaymentsRequest->queryRequest = $queryRequest;
+            $findPaymentsRequest = new FindPayments();
+            $findPaymentsRequest->setQueryRequest($queryRequest);
 
             $findPaymentsResponse = $client->findPayments($findPaymentsRequest);
         } catch (SoapFault $fault) {
-            trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
+            trigger_error(sprintf('SOAP Fault: (faultcode: %s, faultstring: %s)', $fault->faultcode, $fault->faultstring), E_USER_ERROR);
         }
 
         if ($this->send()) {
             echo 'Erreur interne rencontrée';
-        } else {
-            if ($findPaymentsResponse->findPaymentsResult->commonResponse->responseCode != '0') {
-            } else {
-                if (isset ($findPaymentsResponse->findPaymentsResult->commonResponse->transactionStatusLabel)) {
-                    //la carte est non enrôlée ou 3DS Désactivé
+        } else if ($findPaymentsResponse->getFindPaymentsResult()->getCommonResponse()->getResponseCode() === '0') {
+            if (isset ($findPaymentsResponse->getFindPaymentsResult()->getCommonResponse()->getTransactionStatusLabel())) {
+                //la carte est non enrôlée ou 3DS Désactivé
 
-                    // Le paiement est accepté
-                    switch ($findPaymentsResponse->findPaymentsResult->commonResponse->transactionStatusLabel) {
-                        case 'AUTHORISED':
-                            echo 'paiement accepté';
-                            break;
-                        case 'WAITING_AUTORISATION':
-                            echo 'paiement accepté';
-                            break;
-                        case 'AUTHORISED_TO_VALIDATE':
-                            echo 'paiement accepté';
-                            break;
-                        case 'WAITING_AUTORISATION_TO_VALIDATE':
-                            echo 'paiement accepté';
-                            break;
-                        default:
-                            echo 'paiement refusé';
-                            break;
-                    }
-                } else {
-                    $cookie = getJsessionId($client);
+                // Le paiement est accepté
+                switch ($findPaymentsResponse->findPaymentsResult->commonResponse->transactionStatusLabel) {
+                    case 'AUTHORISED':
+                        echo 'paiement accepté';
+                        break;
+                    case 'WAITING_AUTORISATION':
+                        echo 'paiement accepté';
+                        break;
+                    case 'AUTHORISED_TO_VALIDATE':
+                        echo 'paiement accepté';
+                        break;
+                    case 'WAITING_AUTORISATION_TO_VALIDATE':
+                        echo 'paiement accepté';
+                        break;
+                    default:
+                        echo 'paiement refusé';
+                        break;
                 }
+            } else {
+                $cookie = $this->getJsessionId($client);
             }
         }
     }
