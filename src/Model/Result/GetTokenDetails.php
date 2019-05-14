@@ -3,6 +3,7 @@
 namespace YllyClicAndPay\Model\Result;
 
 use YllyClicAndPay\Model\Response\Common;
+use YllyClicAndPay\Model\Response\Subscription as SubscriptionResponse;
 use YllyClicAndPay\Model\Response\Token;
 
 class GetTokenDetails extends Result
@@ -16,6 +17,11 @@ class GetTokenDetails extends Result
      * @var Token
      */
     private $tokenResponse;
+
+    /**
+     * @var SubscriptionResponse
+     */
+    private $subscriptionResponse;
 
     /**
      * @return Common
@@ -47,5 +53,21 @@ class GetTokenDetails extends Result
     public function setTokenResponse($tokenResponse)
     {
         $this->tokenResponse = $tokenResponse;
+    }
+
+    /**
+     * @return SubscriptionResponse
+     */
+    public function getSubscriptionResponse(): SubscriptionResponse
+    {
+        return $this->subscriptionResponse;
+    }
+
+    /**
+     * @param SubscriptionResponse $subscriptionResponse
+     */
+    public function setSubscriptionResponse(SubscriptionResponse $subscriptionResponse): void
+    {
+        $this->subscriptionResponse = $subscriptionResponse;
     }
 }

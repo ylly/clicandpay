@@ -1,11 +1,13 @@
 <?php
 
+
 namespace YllyClicAndPay\Model\Result;
 
-use YllyClicAndPay\Model\Response\Common;
-use YllyClicAndPay\Model\Response\Subscription as SubscriptionResponse;
 
-class UpdatePayment extends Result
+use YllyClicAndPay\Model\Response\Common;
+use YllyClicAndPay\Model\Response\Subscription;
+
+class UpdateToken extends Result
 {
     /**
      * @var Common
@@ -13,14 +15,14 @@ class UpdatePayment extends Result
     private $commonResponse;
 
     /**
-     * @var SubscriptionResponse
+     * @var Subscription
      */
     private $subscriptionResponse;
 
     /**
      * @return Common
      */
-    public function getCommonResponse()
+    public function getCommonResponse(): Common
     {
         return $this->commonResponse;
     }
@@ -28,23 +30,23 @@ class UpdatePayment extends Result
     /**
      * @param Common $commonResponse
      */
-    public function setCommonResponse($commonResponse)
+    public function setCommonResponse(Common $commonResponse): void
     {
         $this->commonResponse = $commonResponse;
     }
 
     /**
-     * @return SubscriptionResponse
+     * @return Subscription
      */
-    public function getSubscriptionResponse(): SubscriptionResponse
+    public function getSubscriptionResponse(): Subscription
     {
         return $this->subscriptionResponse;
     }
 
     /**
-     * @param SubscriptionResponse $subscriptionResponse
+     * @param Subscription $subscriptionResponse
      */
-    public function setSubscriptionResponse(SubscriptionResponse $subscriptionResponse): void
+    public function setSubscriptionResponse(Subscription $subscriptionResponse): void
     {
         $this->subscriptionResponse = $subscriptionResponse;
     }

@@ -52,11 +52,6 @@ class Result
     private $markResponse;
 
     /**
-     * @var SubscriptionResponse
-     */
-    private $subscriptionResponse;
-
-    /**
      * @var Extra
      */
     private $extraResponse;
@@ -182,22 +177,6 @@ class Result
     public function setMarkResponse($markResponse)
     {
         $this->markResponse = $markResponse;
-    }
-
-    /**
-     * @return SubscriptionResponse
-     */
-    public function getSubscriptionResponse()
-    {
-        return $this->subscriptionResponse;
-    }
-
-    /**
-     * @param SubscriptionResponse $subscriptionResponse
-     */
-    public function setSubscriptionResponse($subscriptionResponse)
-    {
-        $this->subscriptionResponse = $subscriptionResponse;
     }
 
     /**

@@ -1,10 +1,12 @@
 <?php
 
+
 namespace YllyClicAndPay\Model\Result;
+
 
 use YllyClicAndPay\Model\Response\Common;
 
-class CancelSubcription
+class CancelPayment
 {
     /**
      * @var Common
@@ -14,7 +16,7 @@ class CancelSubcription
     /**
      * @return Common
      */
-    public function getCommonResponse()
+    public function getCommonResponse(): Common
     {
         return $this->commonResponse;
     }
@@ -22,7 +24,7 @@ class CancelSubcription
     /**
      * @param Common $commonResponse
      */
-    public function setCommonResponse($commonResponse)
+    public function setCommonResponse(Common $commonResponse): void
     {
         $this->commonResponse = $commonResponse;
     }

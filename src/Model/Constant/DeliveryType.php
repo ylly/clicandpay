@@ -1,0 +1,11 @@
+<?php
+
+
+class DeliveryType
+{
+    const RECLAIM_IN_SHOP = 'RECLAIM_IN_SHOP';
+    const RELAY_POINT = 'RELAY_POINT';
+    const RECLAIM_IN_STATION = 'RECLAIM_IN_STATION';
+    const PACKAGE_DELIVERY_COMPANY = 'PACKAGE_DELIVERY_COMPANY';
+    const ETICKET = 'ETICKET';
+}

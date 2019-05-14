@@ -2,7 +2,7 @@
 
 namespace YllyClicAndPay\Model\Response;
 
-use YllyClicAndPay\CreatePaymentResult;
+use YllyClicAndPay\Model\Result\CreatePayment as CreatePaymentResult;
 
 class CreatePayment
 {

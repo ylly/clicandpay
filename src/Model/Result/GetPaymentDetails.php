@@ -1,16 +1,24 @@
 <?php
 
+
 namespace YllyClicAndPay\Model\Result;
+
 
 use YllyClicAndPay\Model\Response\Common;
 use YllyClicAndPay\Model\Response\Subscription as SubscriptionResponse;
+use YllyClicAndPay\Model\Response\Token;
 
-class UpdatePayment extends Result
+class GetPaymentDetails extends Result
 {
     /**
      * @var Common
      */
-    private $commonResponse;
+    public $commonResponse;
+
+    /**
+     * @var Token
+     */
+    public $tokenResponse;
 
     /**
      * @var SubscriptionResponse
@@ -20,7 +28,7 @@ class UpdatePayment extends Result
     /**
      * @return Common
      */
-    public function getCommonResponse()
+    public function getCommonResponse(): Common
     {
         return $this->commonResponse;
     }
@@ -28,9 +36,25 @@ class UpdatePayment extends Result
     /**
      * @param Common $commonResponse
      */
-    public function setCommonResponse($commonResponse)
+    public function setCommonResponse(Common $commonResponse): void
     {
         $this->commonResponse = $commonResponse;
+    }
+
+    /**
+     * @return Token
+     */
+    public function getTokenResponse(): Token
+    {
+        return $this->tokenResponse;
+    }
+
+    /**
+     * @param Token $tokenResponse
+     */
+    public function setTokenResponse(Token $tokenResponse): void
+    {
+        $this->tokenResponse = $tokenResponse;
     }
 
     /**

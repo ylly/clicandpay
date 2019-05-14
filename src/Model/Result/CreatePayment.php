@@ -4,6 +4,7 @@ namespace YllyClicAndPay\Model\Result;
 
 use YllyClicAndPay\Model\Response\Common;
 use YllyClicAndPay\Model\Response\ShoppingCart;
+use YllyClicAndPay\Model\Response\Subscription as SubscriptionResponse;
 
 class CreatePayment extends Result
 {
@@ -16,6 +17,11 @@ class CreatePayment extends Result
      * @var ShoppingCart
      */
     private $shoppingCartResponse;
+
+    /**
+     * @var SubscriptionResponse
+     */
+    private $subscriptionResponse;
 
     /**
      * @return Common
@@ -47,5 +53,21 @@ class CreatePayment extends Result
     public function setShoppingCartResponse($shoppingCartResponse)
     {
         $this->shoppingCartResponse = $shoppingCartResponse;
+    }
+
+    /**
+     * @return SubscriptionResponse
+     */
+    public function getSubscriptionResponse(): SubscriptionResponse
+    {
+        return $this->subscriptionResponse;
+    }
+
+    /**
+     * @param SubscriptionResponse $subscriptionResponse
+     */
+    public function setSubscriptionResponse(SubscriptionResponse $subscriptionResponse): void
+    {
+        $this->subscriptionResponse = $subscriptionResponse;
     }
 }
